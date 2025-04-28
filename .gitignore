@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Django specific
+*.sqlite3
+db.sqlite3
+
+# Environment
+.env
+venv/
+env/
+.venv/
+ENV/
+
+# VSCode settings (если ты через VS Code работаешь)
+.vscode/
+
+# MacOS junk
+.DS_Store
+
+# Node.js junk (если фронт с Node.js или React Native на Expo)
+node_modules/
+
+# Logs
+*.log
+
+# Other
+*.pot
+*.mo
+
+# PyCharm IDE (если юзаешь)
+.idea/
