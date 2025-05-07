@@ -24,18 +24,14 @@ class UserCreateView(generics.CreateAPIView):
         try:
             data = request.data
             serializer = self.serializer_class(data=data)
-            if (not serializer.is_valid()):
-                code = '005'
-                return Response(
-                    {"error": errors[code], "description": serializer.errors, "code": code},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
             if CustomUser.objects.filter(email=email, is_active=True).exists():
                 code = "001"
                 return Response(
                     {"error": errors[code], "code": code},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            
+           
             if not email:
                 code = "002"
                 return Response(
@@ -48,7 +44,12 @@ class UserCreateView(generics.CreateAPIView):
                     {"error": errors[code], "code": code},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
+            if (not serializer.is_valid()):
+                code = '005'
+                return Response(
+                    {"error": errors[code], "description": serializer.errors, "code": code},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             CustomUser.objects.filter(email=email, is_active=False).delete()
             user = serializer.create(serializer.validated_data)
 

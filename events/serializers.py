@@ -12,8 +12,4 @@ class EventSerializer(serializers.ModelSerializer):
             "location",
             "date",
             "created_at",
-            "organizer",
         ]
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["organizer"] = instance.organizer.username
