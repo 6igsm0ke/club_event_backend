@@ -2,7 +2,10 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import *
-from rest_framework.permissions import AllowAny 
+from rest_framework.permissions import AllowAny, IsAuthenticated 
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
+
 
 class UserCreateView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -63,3 +66,15 @@ class UserCreateView(generics.CreateAPIView):
                 {"error": errors[code], "code": code},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        
+class UserViewSet(ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
+

@@ -8,3 +8,4 @@ router.register(r'events', EventViewSet, basename='event')
 urlpatterns = router.urls
 
 urlpatterns += []
+
