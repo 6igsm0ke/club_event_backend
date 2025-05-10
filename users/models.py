@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from .managers import UserManager
+from core.models import BaseOwnedModel
 from django.utils.translation import gettext as _
 from clubs.models import Club
 
@@ -26,7 +27,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = "email"
@@ -55,3 +56,25 @@ class RoleRelated(models.Model):
 
     class Meta:
         unique_together = ["role", "user"]
+
+class Token(BaseOwnedModel):
+    PURPOSE_CHOICES = (
+        (0, ("Registration")),
+        (1, ("Reset password")),
+    )
+    purpose = models.SmallIntegerField(("Purpose"), choices=PURPOSE_CHOICES)
+    is_used = models.BooleanField(default=False)
+
+    @property
+    def is_valid(self):
+        return not self.is_used and timezone.now() - self.created < timezone.timedelta(
+            hours=1
+        )
+
+    @classmethod
+    def check_and_get_token(cls, token, purpose):
+        try:
+            tkn = cls.objects.get(pk=token, purpose=purpose)
+            return [tkn.is_valid, tkn]
+        except cls.DoesNotExist:
+            return [False, None]
