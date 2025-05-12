@@ -10,8 +10,9 @@ from rest_framework.exceptions import PermissionDenied, ValidationError, NotFoun
 from rest_framework.response import Response
 from users.utils import send_event_registration_email
 
+
 class EventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all().order_by('-date')
+    queryset = Event.objects.all().order_by("-date")
     serializer_class = EventSerializer
     permission_classes = [IsClubOrReadOnly]
 
@@ -27,6 +28,14 @@ class EventViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied("Only club admins can create events.")
 
+    def perform_update(self, serializer):
+        user = self.request.user
+        if not user.is_club_admin:
+            raise PermissionDenied("Only club admins can update events.")
+
+        event = serializer.save()
+
+
 class RegisterToEventView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -41,12 +50,17 @@ class RegisterToEventView(APIView):
         if user in event.registered_users.all():
             raise ValidationError("You already registered for this event.")
 
-        if event.max_members is not None and event.registered_users.count() >= event.max_members:
+        if (
+            event.max_members is not None
+            and event.registered_users.count() >= event.max_members
+        ):
             raise ValidationError("Maximum number of participants reached.")
         send_event_registration_email(user, event)
         event.registered_users.add(user)
-        return Response({"message": "You registered succesdfully!"}, status=status.HTTP_200_OK)
-    
+        return Response(
+            {"message": "You registered succesdfully!"}, status=status.HTTP_200_OK
+        )
+
 
 class EventTypesViewSet(viewsets.ModelViewSet):
     queryset = EventType.objects.all()
@@ -54,4 +68,4 @@ class EventTypesViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        return self.queryset.order_by('name')
+        return self.queryset.order_by("name")
