@@ -1,7 +1,6 @@
 from users.models import *
 from rest_framework import serializers
-from clubs.serializers import ClubSerializer    
-
+from .utils import send_email_verification
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
@@ -22,11 +21,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
-        user.is_active = True
+        user.is_active = False
         user.set_password(validated_data["password"])
         user.save()
 
         RoleRelated.objects.create(user=user, role=Role.get_student())
+        send_email_verification(user)
         return user
 
     def to_representation(self, instance):
@@ -35,4 +35,15 @@ class UserSerializer(serializers.ModelSerializer):
         data["roles"] = RoleSerializer(roles, many=True).data
         return data
 
+class PasswordResetRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ["email"]
+
+
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ["password"]
+        password = serializers.CharField(min_length=6, write_only=True)
         
