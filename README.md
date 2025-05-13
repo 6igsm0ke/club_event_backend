@@ -1,4 +1,4 @@
-# 🎉 ClubEvent Backend
+# ClubEvent Backend
 
 ClubEvent Backend is the backend service for the ClubEvent app, built using Django, Django REST Framework, and Django Channels. It handles users, events, clubs, and provides WebSocket-based chat functionality.
 > ⚠️ This project is configured to run locally only. For deployment, additional setup is required.
